@@ -4,7 +4,7 @@ import {
   ref,
   push,
   onValue,
-  remove
+  remove,
 } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
 const appSettings = {
   databaseURL: 'https://mobile-app-b351e-default-rtdb.firebaseio.com/',
@@ -27,16 +27,20 @@ function groceryItem() {
 }
 
 onValue(shoppingListInDB, function (snapshot) {
-  let dataArray = Object.entries(snapshot.val());
+  if (snapshot.exists()) {
+    let dataArray = Object.entries(snapshot.val());
 
-  clearShoppingList();
+    clearShoppingList();
 
-  for (let i = 0; i < dataArray.length; i++) {
-    let currentItem = dataArray[i]
-    let currentItemID = currentItem[0];
-    let currentItemValue = currentItem[1];
+    for (let i = 0; i < dataArray.length; i++) {
+      let currentItem = dataArray[i];
+      let currentItemID = currentItem[0];
+      let currentItemValue = currentItem[1];
 
-    appendItem(currentItem);
+      appendItem(currentItem);
+    }
+  } else {
+    list.innerHTML = 'No Items here...yet';
   }
 });
 
@@ -49,16 +53,16 @@ function clearInput() {
 }
 
 function appendItem(item) {
-let itemID = item[0];
-let itemValue = item[1]
-let li = document.createElement('li');
-li.textContent = itemValue
-list.append(li)
+  let itemID = item[0];
+  let itemValue = item[1];
+  let li = document.createElement('li');
+  li.textContent = itemValue;
+  list.append(li);
 
-li.addEventListener("dblclick", function(){
-let removeItem = ref(database, `shoppingList/${itemID}`)
-    remove(removeItem)
-})
+  li.addEventListener('dblclick', function () {
+    let removeItem = ref(database, `shoppingList/${itemID}`);
+    remove(removeItem);
+  });
 }
 
 btn.addEventListener('click', groceryItem);
