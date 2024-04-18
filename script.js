@@ -4,6 +4,7 @@ import {
   ref,
   push,
   onValue,
+  remove
 } from 'https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js';
 const appSettings = {
   databaseURL: 'https://mobile-app-b351e-default-rtdb.firebaseio.com/',
@@ -23,31 +24,41 @@ function groceryItem() {
   push(shoppingListInDB, inputValue);
 
   clearInput();
-
 }
 
 onValue(shoppingListInDB, function (snapshot) {
-  let dataArray = Object.values(snapshot.val());
+  let dataArray = Object.entries(snapshot.val());
 
-  clearShoppingList()
+  clearShoppingList();
 
-for(let i =0; i < dataArray.length; i++){
-    appendItem(dataArray[i])
-}
+  for (let i = 0; i < dataArray.length; i++) {
+    let currentItem = dataArray[i]
+    let currentItemID = currentItem[0];
+    let currentItemValue = currentItem[1];
 
+    appendItem(currentItem);
+  }
 });
 
-function clearShoppingList(){
-      list.innerHTML = '';
-
+function clearShoppingList() {
+  list.innerHTML = '';
 }
 
 function clearInput() {
   input.value = '';
 }
 
-function appendItem(itemValue) {
-  list.innerHTML += `<li>${itemValue}</li>`;
+function appendItem(item) {
+let itemID = item[0];
+let itemValue = item[1]
+let li = document.createElement('li');
+li.textContent = itemValue
+list.append(li)
+
+li.addEventListener("dblclick", function(){
+let removeItem = ref(database, `shoppingList/${itemID}`)
+    remove(removeItem)
+})
 }
 
 btn.addEventListener('click', groceryItem);
